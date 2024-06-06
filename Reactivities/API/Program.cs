@@ -1,3 +1,5 @@
+using Application.Activities;
+using Application.core;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
@@ -15,11 +17,17 @@ builder.Services.AddDbContext<DataContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-builder.Services.AddCors(opt=>{
-opt.AddPolicy("CorsPolicy",policy => {
-    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+    });
 });
-});
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(List.Handler).Assembly));
+builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -47,7 +55,7 @@ try
 catch (Exception ex)
 {
     var logger = services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex,"an error occurred during migrations");
+    logger.LogError(ex, "an error occurred during migrations");
 }
 
 app.Run();
