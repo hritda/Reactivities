@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Button,
   Card,
@@ -11,11 +11,17 @@ import {
 import { Activity } from "../../../app/models/activity";
 import { useStore } from "../../../app/stores/store";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
-const ActivityDetails = () => {
-  const {activityStore} = useStore();
-  const {selectedActivity:activity, openForm, cancelSelectedActivity} = activityStore ;
-
-  if(!activity) return <LoadingComponent /> ;
+import { observer } from "mobx-react-lite";
+import { Link, useParams } from "react-router-dom";
+const ActivityDetails = observer(() => {
+  const { activityStore } = useStore();
+  const { selectedActivity: activity, loadActivity, loadingInitial } = activityStore;
+  const {id} = useParams();
+ useEffect(() => {
+  if(id) loadActivity(id);
+ }, [id, loadActivity])
+ 
+  if (loadingInitial || !activity) return <LoadingComponent />;
   return (
     <Card fluid>
       <Image src={`/assets/CategoryImages/${activity.category}.jpg`} />
@@ -28,17 +34,12 @@ const ActivityDetails = () => {
       </CardContent>
       <CardContent extra>
         <Button.Group widths="2">
-          <Button onClick = {()=>openForm(activity.id)}basic content="Edit" color="blue" />
-          <Button
-            basic
-            onClick={cancelSelectedActivity}
-            content="Cancel"
-            color="grey"
-          />
+          <Button as ={Link}  to={`/manage/${activity.id}`} basic content="Edit" color="blue" />
+          <Button as ={Link}  to={`/activities`}  basic content="Cancel" color="grey" />
         </Button.Group>
       </CardContent>
     </Card>
   );
-};
+});
 
 export default ActivityDetails;
